@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form } from './Components/Form/Form';
 import { Contacts } from './Components/Contacts/Contacts';
 import { Filter } from './Components/Filter/Filter';
@@ -6,30 +6,26 @@ import s from './App.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  componentDidMount() {
+  useEffect(() => {
     const contacts = localStorage.getItem('contacts');
     const contactsPars = JSON.parse(contacts);
     if (contactsPars) {
-      this.setState({ contacts: contactsPars });
+      setContacts(contactsPars);
     }
-  }
+  }, []);
 
-  getSubmitData = data => {
-    console.log(data);
+  const getSubmitData = data => {
+    console.log(contacts);
     if (
-      this.state.contacts.find(
+      contacts.find(
         contact => contact.name.toLowerCase() === data.name.toLowerCase(),
       )
     ) {
@@ -37,44 +33,34 @@ export class App extends Component {
       return;
     }
 
-    this.setState(prevState => {
-      return { contacts: [...prevState.contacts, data] };
-    });
+    setContacts([...contacts, data]);
   };
 
-  changeFilterValue = event => {
+  const changeFilterValue = event => {
     const { value } = event.target;
-    this.setState({ filter: value });
+    setFilter(value);
   };
 
-  getVisibleContacts = () => {
-    const { contacts, filter } = this.state;
+  const getVisibleContacts = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase()),
     );
   };
 
-  handelDelete = data => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== data),
-    }));
+  const handelDelete = data => {
+    setContacts(contacts.filter(contact => contact.id !== data));
   };
 
-  render() {
-    const visibleContacts = this.getVisibleContacts();
-    const { filter } = this.state;
-    return (
-      <>
-        <h1 className={s.Title}>PhoneBook</h1>
-        <Form submitMethod={this.getSubmitData} />
-        <h2 className={s.Title}>Contacts</h2>
-        <Filter value={filter} onChange={this.changeFilterValue} />
-        <Contacts
-          contacts={visibleContacts}
-          deleteFunction={this.handelDelete}
-        />
-        <ToastContainer />
-      </>
-    );
-  }
-}
+  const visibleContacts = getVisibleContacts();
+
+  return (
+    <>
+      <h1 className={s.Title}>PhoneBook</h1>
+      <Form submitMethod={getSubmitData} />
+      <h2 className={s.Title}>Contacts</h2>
+      <Filter value={filter} onChange={changeFilterValue} />
+      <Contacts contacts={visibleContacts} deleteFunction={handelDelete} />
+      <ToastContainer />
+    </>
+  );
+};

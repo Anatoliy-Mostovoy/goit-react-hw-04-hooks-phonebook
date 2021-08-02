@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import s from './Form.module.css';
 
 export const Form = ({ submitMethod }) => {
-  console.log(submitMethod);
   Form.propTypes = {
     submitMethod: PropTypes.func.isRequired,
   };
@@ -35,10 +34,9 @@ export const Form = ({ submitMethod }) => {
 
     setId(id);
   };
-  console.log(name, number, id);
+
   const handleSubmit = event => {
     event.preventDefault();
-
     submitMethod({ name, number, id });
     resetState();
   };
